@@ -11,6 +11,8 @@ What can do this bot:
 6) Get KuCoin account's UID
 
 It works via Selenium and https://anti-captcha.com/ extension. You need to refill it before starting the work. 
+Also download chromedriver for your current Chrome version and system. Copy this to project folder. You can download it here: https://chromedriver.chromium.org/downloads
+
 
 Enter your API_KEY, prefer trading password and processes count in config file.
 WARNING! DO NOT ENTER MORE THAN 5 PROCESSES, OTHERWISE SELENIUM CAN START TO WORK UNCORRECTLY
