@@ -1,0 +1,6 @@
+selenium~=4.5.0
+loguru~=0.6.0
+requests~=2.28.1
+bs4~=0.0.1
+beautifulsoup4~=4.11.1
+passwordgenerator~=1.5.1
