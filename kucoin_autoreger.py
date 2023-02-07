@@ -1,7 +1,7 @@
 from random import randint, choice
 from multiprocessing import Pool
 import selenium.common.exceptions
-from seleniumwire import webdriver
+from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.service import Service
@@ -31,13 +31,14 @@ with open('config.json','r') as file:
     processes_count = config_file['processes_count']
 
 logger.info("THIS SOFTWARE WAS WRITTEN BY FLEXTER | https://t.me/flexterwork")
-logger.info("CURRENT VERSION 1.0.0")
+logger.info("CURRENT VERSION 1.1.0")
 
 class KucoinReger:
 
 
 
     def create_browser(self):
+        browser = False
         try:
             chrome_options = Options()
             chrome_options.add_argument(f'user-agent={choice(ua_list)}')
@@ -45,6 +46,7 @@ class KucoinReger:
             chrome_options.add_extension((os.path.abspath('anticaptcha-plugin_v0.62.crx')))
             browser = webdriver.Chrome(service=Service(os.path.abspath('chromedriver')), options=chrome_options)
             browser.maximize_window()
+            sleep(3)
             browser.get('chrome-extension://lncaoejhfdpcafpkkcddpjnhnodcajfg/options.html')
             browser.implicitly_wait(5)
             api_key = browser.find_element(By.CSS_SELECTOR,
@@ -53,12 +55,15 @@ class KucoinReger:
 
             log_in_button = browser.find_element(By.CSS_SELECTOR, 'body > div > input').click()
 
+
             return browser
         except Exception as ex:
             logger.error(ex)
-            browser.quit()
+            if browser:
+                browser.quit()
 
     def rambler_login(self, log_pass:str):
+        browser = False
         try:
             login, password = log_pass.split(':')
             browser = self.create_browser()
@@ -82,7 +87,7 @@ class KucoinReger:
                 save_button = browser.find_element(By.CSS_SELECTOR,'body > div:nth-child(9) > div > div > div > form > footer > button.rui-Button-button.rui-Button-type-primary.rui-Button-size-medium.rui-Button-iconPosition-left > span').click()
                 browser.get('https://mail.rambler.ru/folder/INBOX')
                 browser.implicitly_wait(15)
-                sleep(10)
+                sleep(3)
                 if browser.page_source.find('Изменение пароля в Rambler')!=-1:
                     logger.info(f'Успешно изменил пароль в почте Rambler | {login}:{new_password}')
                     with open('new_rambler_passes.txt', 'a+') as file:
@@ -92,7 +97,8 @@ class KucoinReger:
                 browser.quit()
                 return [False]
         except:
-            browser.quit()
+            if browser:
+                browser.quit()
             return [False]
 
     def kucoin_reger(self, log_pass:str):
@@ -102,20 +108,21 @@ class KucoinReger:
             browser.get('https://mail.rambler.ru/folder/INBOX')
             browser.implicitly_wait(15)
             sleep(5)
+            have_code = False
             if browser.page_source.find('KuCoin Verification Code') != -1:
                 last_two_messages = browser.find_elements(By.CLASS_NAME, 'ListItem-snippet-1a')[:2]
                 for message in last_two_messages:
                     try:
                         code = (re.search(r"\d+", message.text).group())
                         if int(code)!=int(last_code):
+                            have_code = True
                             return code
                     except:
                         pass
-            else:
-                browser.find_element(By.CSS_SELECTOR,
-                                     '#app > div.App-root-hg > div.AppContainer-root-3m.AppContainer-withRightAdMax-Bm.AutoAppContainer-root-2P > div.AutoAppContainer-inner-1B > div.AutoAppContainer-sidebar-LW > div.FoldersSidebar-root-1a > div:nth-child(1) > div > ul > li:nth-child(5) > div > a').click()
-                sleep(3)
-                browser.implicitly_wait(3)
+            elif have_code is False:
+                browser.get('https://mail.rambler.ru/folder/Spam')
+                sleep(5)
+                browser.implicitly_wait(15)
                 if browser.page_source.find('KuCoin Verification Code') != -1:
                     code = re.search(r"\d+", browser.find_element(By.CLASS_NAME, 'ListItem-snippet-1a').text).group()
                     if int(code) != int(last_code):
